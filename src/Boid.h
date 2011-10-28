@@ -19,6 +19,16 @@ class Boid : public Drawable
     private:
         glm::vec3 m_Position;
         bool m_Rotate;
+        float m_NeckSize;
+        float m_HeadHeight;
+        float m_BodyHeight;
+        float m_TailHeight;
+        float m_TailWidth;
+        float m_TailLength;
+        float m_WingWidth;
+        float m_WingLength;
+        float m_WingTipHeight;
+        float m_WingTipFlap;
 };
 
 // ============================================= //
