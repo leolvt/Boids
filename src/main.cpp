@@ -9,11 +9,11 @@
 const float angleInc = PI / 36;
 float eyeX = 0;
 float eyeY = 0;
-float eyeZ = 5;
+float eyeZ = 10;
 float upX = 0;
 float upY = 1;
 float upZ = 0;
-float eyeRadius = 5;
+float eyeRadius = 10;
 float eyeTheta = 0.0;
 float eyePhi = 0.0;
 
@@ -73,7 +73,7 @@ void draw()
     // Set Perspective
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, 1.33, 1.6, 10);
+    gluPerspective(60.0, 1.33, 1.6, 100);
     glMatrixMode(GL_MODELVIEW);
 
     if (myBoid != 0)
@@ -99,7 +99,7 @@ int main()
     std::cout << "Starting GLEW." << std::endl;
 
     std::cout << "Creating Boid" << std::endl;
-    glm::vec3 orig(0,0,0);
+    glm::vec3 orig(0,0,2);
     myBoid = new Boids::Boid(orig, true);
     orig = glm::vec3(-2,0,-2);
     myBoid2 = new Boids::Boid(orig, true);

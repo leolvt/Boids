@@ -23,7 +23,9 @@ Boid::Boid(glm::vec3 pos, bool rotate)
     this->m_WingWidth = 0.05 * 2;
     this->m_WingLength = 0.7 * 2;
     this->m_WingTipHeight = 0.2 * 2;
-    this->m_WingTipFlap = 0;
+    this->m_WingTipFlapX = 0.7 * 2;
+    this->m_WingTipFlapZ = 0;
+    this->m_Angle = 0;
 }
 
 // ============================================= //
@@ -37,7 +39,13 @@ Boid::~Boid()
 
 void Boid::update()
 {
-    this->m_WingTipFlap = glm::cos(glfwGetTime()*PI);
+    /* bewtwwn -1 and 1 (min and max angle) */
+    float angleVariation = glm::cos(glfwGetTime()*PI);
+    float currAngle = 30.0/180*PI * angleVariation;
+    m_WingTipFlapX = m_WingLength * glm::cos(currAngle);
+    m_WingTipFlapZ = m_WingLength * glm::sin(currAngle);
+
+    m_Angle = 360.0 *  (glfwGetTime() / 4);
 }
 
 // ============================================= //
@@ -48,8 +56,13 @@ void Boid::draw()
     {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
+        glRotatef(m_Angle, 0,1,0);
         glTranslatef(m_Position.x,m_Position.y, m_Position.z);
-        glRotated(-90,1,0,0);
+        glScalef(0.5, 0.5, 0.5);
+        //glRotatef(m_Angle,0,0,1);
+        glRotatef(-45,1,0,0);
+        glRotatef(-90,0,0,1);
+        glRotatef(90,0,1,0);
     }
 
     glPushMatrix();
@@ -92,7 +105,7 @@ void Boid::draw()
     // Draw Right Wing
     glBegin(GL_TRIANGLE_FAN);
         glColor3f(0.2, 1.0, 0.0);
-        glVertex3f(m_WingLength, 1-m_HeadHeight-m_BodyHeight+m_WingTipHeight, m_WingTipFlap);
+        glVertex3f(m_WingTipFlapX, 1-m_HeadHeight-m_BodyHeight+m_WingTipHeight, m_WingTipFlapZ);
         glVertex3f(m_NeckSize/2, 1-m_HeadHeight, m_WingWidth/2);
         glVertex3f(m_NeckSize/2, 1-m_HeadHeight, -m_WingWidth/2);
         glVertex3f(0.0, 1.0-m_HeadHeight-m_BodyHeight, 0.0);
@@ -102,7 +115,7 @@ void Boid::draw()
     // Draw Left Wing
     glBegin(GL_TRIANGLE_FAN);
         glColor3f(0.2, 1.0, 0.0);
-        glVertex3f(-m_WingLength, 1-m_HeadHeight-m_BodyHeight+m_WingTipHeight, m_WingTipFlap);
+        glVertex3f(-m_WingTipFlapX, 1-m_HeadHeight-m_BodyHeight+m_WingTipHeight, m_WingTipFlapZ);
         glVertex3f(-m_NeckSize/2, 1-m_HeadHeight, m_WingWidth/2);
         glVertex3f(-m_NeckSize/2, 1-m_HeadHeight, -m_WingWidth/2);
         glVertex3f(0.0, 1.0-m_HeadHeight-m_BodyHeight, 0.0);

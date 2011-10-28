@@ -28,7 +28,9 @@ class Boid : public Drawable
         float m_WingWidth;
         float m_WingLength;
         float m_WingTipHeight;
-        float m_WingTipFlap;
+        float m_WingTipFlapX;
+        float m_WingTipFlapZ;
+        float m_Angle;
 };
 
 // ============================================= //
