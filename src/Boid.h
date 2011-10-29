@@ -1,14 +1,14 @@
 #ifndef BOID_H_INCLUDED
 #define BOID_H_INCLUDED
 
-#include "Drawable.h"
+#include <glm/glm.hpp>
 
 namespace Boids
 {
 
 // ============================================= //
 
-class Boid : public Drawable
+class Boid
 {
     public:
         Boid(glm::vec3 position);

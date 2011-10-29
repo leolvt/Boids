@@ -1,8 +1,6 @@
 #ifndef WORLD_H_INCLUDED
 #define WORLD_H_INCLUDED
 
-#include "Drawable.h"
-
 namespace Boids {
 
 namespace World {

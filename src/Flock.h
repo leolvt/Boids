@@ -6,13 +6,12 @@
 #include <glm/glm.hpp>
 
 #include "Boid.h"
-#include "Drawable.h"
 
 namespace Boids {
 
 // ============================================= //
 
-class Flock : public Drawable
+class Flock
 {
     public:
         Flock(unsigned int numBoids);
