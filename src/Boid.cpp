@@ -1,9 +1,8 @@
 #include <GL/gl.h>
 #include <GL/glfw.h>
 
+#include "Util.h"
 #include "Boid.h"
-
-#define PI 3.141592653589793
 
 namespace Boids {
 
@@ -15,8 +14,8 @@ Boid::Boid(glm::vec3 pos, bool rotate)
     this->m_Rotate = rotate;
 
     this->m_NeckSize = 0.3 * 2;
-    this->m_HeadHeight = 0.2 * 2;
-    this->m_BodyHeight = 0.6 * 2;
+    this->m_HeadHeight = 0.3 * 2;
+    this->m_BodyHeight = 0.5 * 2;
     this->m_TailHeight = 0.2 * 2;
     this->m_TailWidth = 0.05 * 2;
     this->m_TailLength = 0.3 * 2;
@@ -39,9 +38,9 @@ Boid::~Boid()
 
 void Boid::update()
 {
-    /* bewtwwn -1 and 1 (min and max angle) */
-    float angleVariation = glm::cos(glfwGetTime()*PI);
-    float currAngle = 30.0/180*PI * angleVariation;
+    /* bewteen -1 and 1 (min and max angle) */
+    float angleVariation = glm::cos(glfwGetTime()*Util::PI);
+    float currAngle = 30.0/180*Util::PI * angleVariation;
     m_WingTipFlapX = m_WingLength * glm::cos(currAngle);
     m_WingTipFlapZ = m_WingLength * glm::sin(currAngle);
 
@@ -65,9 +64,6 @@ void Boid::draw()
         glRotatef(90,0,1,0);
     }
 
-    glPushMatrix();
-    //glRotatef(45.0, 0, 1, 0);
-
     // Draw Head
     glBegin(GL_TRIANGLE_FAN);
         glColor3f(1.0, 0.0, 0.0);
@@ -89,7 +85,6 @@ void Boid::draw()
         glVertex3f(-m_NeckSize/2, 1-m_HeadHeight, -m_NeckSize/2);
         glVertex3f(-m_NeckSize/2, 1-m_HeadHeight, m_NeckSize/2);
     glEnd();
-    glPopMatrix();
 
     // Draw Tail
     glBegin(GL_TRIANGLE_FAN);
