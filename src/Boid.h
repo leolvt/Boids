@@ -11,14 +11,19 @@ namespace Boids
 class Boid : public Drawable
 {
     public:
-        Boid(glm::vec3 position, bool rotate);
+        Boid(glm::vec3 position);
         virtual ~Boid();
         void update();
         void draw();
+        glm::vec3 getPosition();
+        glm::vec3 getHeading();
 
     private:
         glm::vec3 m_Position;
-        bool m_Rotate;
+        glm::vec3 m_Heading;
+        glm::vec3 m_Velocity;
+        glm::vec3 m_Up;
+
         float m_NeckSize;
         float m_HeadHeight;
         float m_BodyHeight;
@@ -31,6 +36,8 @@ class Boid : public Drawable
         float m_WingTipFlapX;
         float m_WingTipFlapZ;
         float m_Angle;
+        float m_FlapPhase;
+        float m_FlapFactor;
 };
 
 // ============================================= //

@@ -2,9 +2,11 @@
 
 #include <GL/glfw.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/vector_angle.hpp>
 
 #include "Util.h"
 #include "Boid.h"
+#include "Flock.h"
 #include "World.h"
 
 namespace Boids {
@@ -32,6 +34,8 @@ float eyeRadius = 10;
 float eyeTheta = 0.0;
 float eyePhi = 0.0;
 
+/* Th flock of boids*/
+Flock* flock = 0;
 Boid* myBoid = 0;
 
 };
@@ -40,6 +44,7 @@ Boid* myBoid = 0;
 
 void initialize()
 {
+    // Create Window and set callbacks
     std::cout << "Starting GLFW and opening window." << std::endl;
     glfwInit();
     glfwOpenWindow(800, 600, 8, 8, 8, 8, 8, 0, GLFW_WINDOW);
@@ -47,9 +52,16 @@ void initialize()
     glfwSetKeyCallback(keyPressed);
     glEnable(GL_DEPTH_TEST);
 
+    // Create the flock
+    flock = new Flock(100);
+
+    glm::vec3 V1(1,0,-1);
+    glm::vec3 V2(0,1,1);
+    std::cout << "Angle: " << glm::angle(glm::normalize(V1), glm::normalize(V2)) << std::endl;
+
     // Create dummy boid
     glm::vec3 pos(0,0,2);
-    myBoid = new Boid(pos, true);
+    myBoid = new Boid(pos);
 }
 
 // ============================================= //
@@ -99,6 +111,7 @@ void keyPressed(int key, int status)
 
 void update()
 {
+    if (flock != 0) flock->update();
     if (myBoid != 0) myBoid->update();
 }
 
@@ -123,6 +136,10 @@ void draw()
     if (myBoid != 0)
     {
         myBoid->draw();
+    }
+    if (flock != 0)
+    {
+        flock->draw();
     }
 
     glfwSwapBuffers();
@@ -171,6 +188,12 @@ void terminate()
     {
         delete myBoid;
         myBoid = 0;
+    }
+
+    if (flock != 0)
+    {
+        delete flock;
+        flock = 0;
     }
 
     /* No more GLFW... */

@@ -1,5 +1,8 @@
 set(BOIDS_SRC 
     ${BOIDS_SRC} 
+    World.cpp
+    Util.cpp
+    Flock.cpp
     Boid.cpp
     main.cpp
 )
