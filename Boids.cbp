@@ -59,7 +59,12 @@
 		</Compiler>
 		<Unit filename="src\Boid.cpp" />
 		<Unit filename="src\Boid.h" />
-		<Unit filename="src\Drawable.h" />
+		<Unit filename="src\Flock.cpp" />
+		<Unit filename="src\Flock.h" />
+		<Unit filename="src\Util.cpp" />
+		<Unit filename="src\Util.h" />
+		<Unit filename="src\World.cpp" />
+		<Unit filename="src\World.h" />
 		<Unit filename="src\main-sample.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
