@@ -17,6 +17,8 @@ Boid::Boid(glm::vec3 pos)
     this->m_Up = glm::vec3(0, 1, 0);
     this->m_Heading = glm::vec3(0, 0, -1);
 
+    this->m_AngleX = 0;
+    this->m_AngleY = 0;
     this->m_NeckSize = 0.3 * 2;
     this->m_HeadHeight = 0.3 * 2;
     this->m_BodyHeight = 0.5 * 2;
@@ -80,49 +82,60 @@ glm::vec3 Boid::computeSeparation(Boid& b)
 void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
                   glm::vec3 center, glm::vec3 target)
 {
+    /* Some factors */
+    float alignmentFactor = 1;
+    float cohesionFactor = 1;
+    float separationFactor = 1;
+    float targetFactor = 1;
+
     /* Compute alignment component */
-    glm::vec3 alignment = (flockVelocity - m_Velocity);
-    alignment *= 0.1;
+    glm::vec3 alignmentComp = (flockVelocity - m_Velocity);
+    alignmentComp *= alignmentFactor;
 
     /* Compute cohesion component */
-    glm::vec3 cohesion = (center - m_Position);
-    cohesion = Util::normalize(cohesion, 2.5);
-    cohesion *= 0.5;
+    glm::vec3 cohesionComp = (center - m_Position);
+    cohesionComp = Util::normalize(cohesionComp, 2.5);
+    cohesionComp *= cohesionFactor;
 
     /* Compute separation component */
-    glm::vec3 sepComp = separation;
-    sepComp *= 0.5;
+    glm::vec3 separationComp = separation;
+    separationComp *= separationFactor;
 
     /* Compute target component */
-    glm::vec3 targetComp = (target - center);
-    targetComp *= 0.1;
+    glm::vec3 targetComp = (target - m_Position);
+    targetComp = Util::normalize(targetComp, 1.5);
+    targetComp *= targetFactor;
 
     /* Update Velocity */
-    glm::vec3 sum = sepComp + alignment + cohesion + targetComp;
-
-    m_Velocity += sum;
+    glm::vec3 sum = separationComp + alignmentComp + cohesionComp + targetComp;
+    sum /= (alignmentFactor + cohesionFactor + separationFactor + targetFactor);
+    m_Velocity = sum;
 
     /* Ensure Max Speed */
-    if (glm::length(m_Velocity) > 0.2)
+    if (glm::length(m_Velocity) > 0.5)
     {
         m_Velocity = glm::normalize(m_Velocity);
-        m_Velocity *= 0.2;
+        m_Velocity *= 0.5;
     }
 
     /* Update Heading based on new velocity */
-    //m_Heading = glm::normalize(m_Heading + m_Velocity);
+    m_Heading = glm::normalize(m_Heading + m_Velocity);
     glm::vec3 aux = m_Heading;
     glm::vec3 origHeading(0,0,-1);
 
     // Compute Y Axix Rotation Angle
     aux = m_Heading;
     aux.y = 0;
-    //m_AngleY = computeAngle(origHeading, aux);
+    double y = glm::cross(origHeading, aux).y;
+    m_AngleY = Util::computeAngle(origHeading, aux);
+    m_AngleY *= y / glm::abs(y);
 
     // Compute X Axix Rotation Angle
     aux = m_Heading;
     aux.x = 0;
-    //m_AngleX = computeAngle(origHeading, aux);
+    double x = glm::cross(origHeading, aux).x;
+    m_AngleX = Util::computeAngle(origHeading, aux);
+    m_AngleX *= x / glm::abs(x);
 
     /* Update Up based on Velocity */
     //m_Up = mUp - m_Velocity;
@@ -149,9 +162,9 @@ void Boid::draw()
     //glRotatef(m_Angle, 0,1,0);
     glTranslatef(m_Position.x,m_Position.y, m_Position.z);
     glScalef(0.5, 0.5, 0.5);
-    //glRotatef(-45,1,0,0);
     //glRotatef(-90,0,0,1);
-    //glRotatef(90,0,1,0);
+    glRotatef(m_AngleY,0,1,0);
+    glRotatef(m_AngleX,1,0,0);
 
     // Draw Head
     glBegin(GL_TRIANGLE_FAN);

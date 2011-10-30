@@ -1,7 +1,8 @@
+#include <iostream>
 #include <cstdlib>
 #include <ctime>
 
-#include <iostream>
+#include <glm/gtx/vector_angle.hpp>
 
 #include "Util.h"
 
@@ -44,7 +45,6 @@ double normNegSigmoid(double val, double limit)
     // When val -> limit,  fac -> 1,
     // when val -> 0,      fac -> 0
     double fac = 1/(1 + glm::exp(-9/limit*(limit/2-val)));
-    fac /= 0.4*limit;
     return fac;
 }
 
@@ -56,7 +56,6 @@ double normSigmoid(double val, double limit)
     // When val -> limit,  fac -> 1,
     // when val -> 0,      fac -> 0
     double fac = 1/(1 + glm::exp(9/limit*(limit/2-val)));
-    fac /= 0.4*limit;
     return fac;
 }
 
@@ -99,4 +98,14 @@ glm::vec3 normalizeNeg(glm::vec3 vec, double limit)
 }
 
 // ============================================= //
+
+double computeAngle(glm::vec3 vec1, glm::vec3 vec2)
+{
+    vec1 = glm::normalize(vec1);
+    vec2 = glm::normalize(vec2);
+    return glm::angle(vec2, vec1);
+}
+
+// ============================================= //
+
 };

@@ -51,7 +51,7 @@ void initialize()
     glEnable(GL_DEPTH_TEST);
 
     // Create the flock
-    flock = new Flock(10);
+    flock = new Flock(500);
 }
 
 // ============================================= //

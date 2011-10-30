@@ -27,6 +27,8 @@ class Boid
         glm::vec3 m_Velocity;
         glm::vec3 m_Up;
 
+        float m_AngleX;
+        float m_AngleY;
         float m_NeckSize;
         float m_HeadHeight;
         float m_BodyHeight;

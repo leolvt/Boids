@@ -39,7 +39,7 @@ void Flock::update()
     glm::vec3 separation;
     glm::vec3 flockVelocity = computeFlockVelocity();
     glm::vec3 center = computeFlockCenter();
-    glm::vec3 target(0, 0, 0);
+    glm::vec3 target(0, 0, -2);
 
     /* Update each Boid */
     for (auto boid = boids.begin(); boid != boids.end(); boid++)
