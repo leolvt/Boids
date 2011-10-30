@@ -49,6 +49,13 @@ glm::vec3 Boid::getPosition()
 
 // ============================================= //
 
+glm::vec3 Boid::getVelocity()
+{
+    return (this->m_Velocity);
+}
+
+// ============================================= //
+
 glm::vec3 Boid::getHeading()
 {
     return (this->m_Heading);
@@ -58,41 +65,42 @@ glm::vec3 Boid::getHeading()
 
 glm::vec3 Boid::computeSeparation(Boid& b)
 {
-    // Compute the separation vector and the distance between the boids
-    glm::vec3 sep = b.getPosition() - m_Position;
-    double dist = glm::length(sep) + 0.001;
+    // Compute the separation between the two boids
+    glm::vec3 sep = (b.getPosition() - m_Position);
 
-    // Compute a normalization factor based on a sigmoid function.
-    // When distance -> 0, fac -> 2,
-    // when distance -> v  fac -> 0
-    double v = 2.5;
-    double fac = 3/(1 + glm::exp(-9/v*(v/2-dist)));
+    // Normalize it by a distance factor
+    sep = Util::normalizeNeg(sep, 2.5);
 
-    // Return the separation vector normalized by the factor above
-    sep *= fac;
+    // Normalize it and return
     return -sep;
 }
 
 // ============================================= //
 
-void Boid::update(glm::vec3 separation, glm::vec3 flockHeading, glm::vec3 center)
+void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
+                  glm::vec3 center, glm::vec3 target)
 {
     /* Compute alignment component */
-    glm::vec3 alignment = (flockHeading - m_Heading);
-    alignment *= 0.00;
+    glm::vec3 alignment = (flockVelocity - m_Velocity);
+    alignment *= 0.1;
 
     /* Compute cohesion component */
     glm::vec3 cohesion = (center - m_Position);
-    cohesion *= 0.1;
+    cohesion = Util::normalize(cohesion, 2.5);
+    cohesion *= 0.5;
 
     /* Compute separation component */
-    separation = (separation);
-    separation *= 0.1;
+    glm::vec3 sepComp = separation;
+    sepComp *= 0.5;
+
+    /* Compute target component */
+    glm::vec3 targetComp = (target - center);
+    targetComp *= 0.1;
 
     /* Update Velocity */
-    glm::vec3 sum = separation + alignment + cohesion;
-    std::cout << glm::length(sum) << std::endl;
-    m_Velocity = sum;
+    glm::vec3 sum = sepComp + alignment + cohesion + targetComp;
+
+    m_Velocity += sum;
 
     /* Ensure Max Speed */
     if (glm::length(m_Velocity) > 0.2)
@@ -101,17 +109,28 @@ void Boid::update(glm::vec3 separation, glm::vec3 flockHeading, glm::vec3 center
         m_Velocity *= 0.2;
     }
 
-    /* Update Headding based on new velocity */
-    //m_Heading = glm::normalize( m_Heading + m_Velocity );
+    /* Update Heading based on new velocity */
+    //m_Heading = glm::normalize(m_Heading + m_Velocity);
+    glm::vec3 aux = m_Heading;
+    glm::vec3 origHeading(0,0,-1);
 
-    /* Update Up based on Heading */
-    //std::cout << m_Velocity.x << ", " << m_Velocity.y << ", " << m_Velocity.z << std::endl;
+    // Compute Y Axix Rotation Angle
+    aux = m_Heading;
+    aux.y = 0;
+    //m_AngleY = computeAngle(origHeading, aux);
+
+    // Compute X Axix Rotation Angle
+    aux = m_Heading;
+    aux.x = 0;
+    //m_AngleX = computeAngle(origHeading, aux);
+
+    /* Update Up based on Velocity */
+    //m_Up = mUp - m_Velocity;
 
     /* Update Position based on new velocity */
     m_Position += m_Velocity;
 
-    /* bewteen -1 and 1 (min and max angle) */
-
+    /* Compute Wing flapping */
     float angleVariation = glm::cos(m_FlapFactor*glfwGetTime()*Util::PI + m_FlapPhase);
     float currAngle = 30.0/180*Util::PI * angleVariation;
     m_WingTipFlapX = m_WingLength * glm::cos(currAngle);

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <GL/glfw.h>
 #include <glm/glm.hpp>
 
 #include "Flock.h"
@@ -36,14 +37,15 @@ void Flock::update()
 {
     /* The vectors which influentiate the boids' speed */
     glm::vec3 separation;
-    glm::vec3 flockHeading = computeFlockHeading();
+    glm::vec3 flockVelocity = computeFlockVelocity();
     glm::vec3 center = computeFlockCenter();
+    glm::vec3 target(0, 0, 0);
 
     /* Update each Boid */
     for (auto boid = boids.begin(); boid != boids.end(); boid++)
     {
         separation = computeBoidSeparation(boid);
-        boid->update(separation, flockHeading, center);
+        boid->update(separation, flockVelocity, center, target);
     }
 }
 
@@ -54,10 +56,23 @@ glm::vec3 Flock::computeBoidSeparation(std::vector<Boid>::iterator currBoid)
     glm::vec3 separation(0,0,0);
     for (auto boid = boids.begin(); boid != boids.end(); boid++)
     {
-        //if (boid == currBoid) continue;
+        if (boid == currBoid) continue;
         separation += currBoid->computeSeparation(*boid);
     }
     return separation;
+}
+
+// ============================================= //
+
+glm::vec3 Flock::computeFlockVelocity()
+{
+    glm::vec3 velocity(0,0,0);
+    for (auto boid = boids.begin(); boid != boids.end(); boid++)
+    {
+        velocity += boid->getVelocity();
+    }
+    velocity /= boids.size();
+    return velocity;
 }
 
 // ============================================= //

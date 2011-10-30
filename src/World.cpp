@@ -2,7 +2,6 @@
 
 #include <GL/glfw.h>
 #include <glm/glm.hpp>
-#include <glm/gtx/vector_angle.hpp>
 
 #include "Util.h"
 #include "Boid.h"
@@ -52,12 +51,7 @@ void initialize()
     glEnable(GL_DEPTH_TEST);
 
     // Create the flock
-    flock = new Flock(100);
-
-    glm::vec3 V1(1,0,-1);
-    glm::vec3 V2(0,1,1);
-    std::cout << "Angle: " << glm::angle(glm::normalize(V1), glm::normalize(V2)) << std::endl;
-
+    flock = new Flock(10);
 }
 
 // ============================================= //

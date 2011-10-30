@@ -21,6 +21,7 @@ class Flock
     private:
         glm::vec3 computeFlockCenter();
         glm::vec3 computeFlockHeading();
+        glm::vec3 computeFlockVelocity();
         glm::vec3 computeBoidSeparation(std::vector<Boid>::iterator currBoid);
 
         unsigned int m_NumBoids;
