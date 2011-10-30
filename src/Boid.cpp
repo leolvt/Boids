@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <GL/gl.h>
 #include <GL/glfw.h>
 
@@ -11,6 +13,9 @@ namespace Boids {
 Boid::Boid(glm::vec3 pos)
 {
     this->m_Position = pos;
+    this->m_Velocity = glm::vec3(0, 0, 0);
+    this->m_Up = glm::vec3(0, 1, 0);
+    this->m_Heading = glm::vec3(0, 0, -1);
 
     this->m_NeckSize = 0.3 * 2;
     this->m_HeadHeight = 0.3 * 2;
@@ -51,15 +56,69 @@ glm::vec3 Boid::getHeading()
 
 // ============================================= //
 
-void Boid::update()
+glm::vec3 Boid::computeSeparation(Boid& b)
 {
+    // Compute the separation vector and the distance between the boids
+    glm::vec3 sep = b.getPosition() - m_Position;
+    double dist = glm::length(sep) + 0.001;
+
+    // Compute a normalization factor based on a sigmoid function.
+    // When distance -> 0, fac -> 2,
+    // when distance -> v  fac -> 0
+    double v = 2.5;
+    double fac = 3/(1 + glm::exp(-9/v*(v/2-dist)));
+
+    // Return the separation vector normalized by the factor above
+    sep *= fac;
+    return -sep;
+}
+
+// ============================================= //
+
+void Boid::update(glm::vec3 separation, glm::vec3 flockHeading, glm::vec3 center)
+{
+    /* Compute alignment component */
+    glm::vec3 alignment = (flockHeading - m_Heading);
+    alignment *= 0.00;
+
+    /* Compute cohesion component */
+    glm::vec3 cohesion = (center - m_Position);
+    cohesion *= 0.1;
+
+    /* Compute separation component */
+    separation = (separation);
+    separation *= 0.1;
+
+    /* Update Velocity */
+    glm::vec3 sum = separation + alignment + cohesion;
+    std::cout << glm::length(sum) << std::endl;
+    m_Velocity = sum;
+
+    /* Ensure Max Speed */
+    if (glm::length(m_Velocity) > 0.2)
+    {
+        m_Velocity = glm::normalize(m_Velocity);
+        m_Velocity *= 0.2;
+    }
+
+    /* Update Headding based on new velocity */
+    //m_Heading = glm::normalize( m_Heading + m_Velocity );
+
+    /* Update Up based on Heading */
+    //std::cout << m_Velocity.x << ", " << m_Velocity.y << ", " << m_Velocity.z << std::endl;
+
+    /* Update Position based on new velocity */
+    m_Position += m_Velocity;
+
     /* bewteen -1 and 1 (min and max angle) */
+
     float angleVariation = glm::cos(m_FlapFactor*glfwGetTime()*Util::PI + m_FlapPhase);
     float currAngle = 30.0/180*Util::PI * angleVariation;
     m_WingTipFlapX = m_WingLength * glm::cos(currAngle);
     m_WingTipFlapZ = m_WingLength * glm::sin(currAngle);
 
     m_Angle = 360.0 * (glfwGetTime() / 4);
+
 }
 
 // ============================================= //

@@ -18,7 +18,7 @@ namespace World {
 namespace {
 
 /* Define some variables to control FPS and Game Update Rate */
-const int TICKS_PER_SECOND = 50;
+const int TICKS_PER_SECOND = 10;
 const float SKIP_TICKS = 1.0 / TICKS_PER_SECOND;
 const int MAX_FRAMESKIP = 10;
 
@@ -36,7 +36,6 @@ float eyePhi = 0.0;
 
 /* Th flock of boids*/
 Flock* flock = 0;
-Boid* myBoid = 0;
 
 };
 
@@ -59,9 +58,6 @@ void initialize()
     glm::vec3 V2(0,1,1);
     std::cout << "Angle: " << glm::angle(glm::normalize(V1), glm::normalize(V2)) << std::endl;
 
-    // Create dummy boid
-    glm::vec3 pos(0,0,2);
-    myBoid = new Boid(pos);
 }
 
 // ============================================= //
@@ -112,7 +108,6 @@ void keyPressed(int key, int status)
 void update()
 {
     if (flock != 0) flock->update();
-    if (myBoid != 0) myBoid->update();
 }
 
 // ============================================= //
@@ -133,10 +128,6 @@ void draw()
     gluPerspective(60.0, 1.33, 1.6, 100);
     glMatrixMode(GL_MODELVIEW);
 
-    if (myBoid != 0)
-    {
-        myBoid->draw();
-    }
     if (flock != 0)
     {
         flock->draw();
@@ -184,12 +175,6 @@ void run()
 
 void terminate()
 {
-    if (myBoid != 0)
-    {
-        delete myBoid;
-        myBoid = 0;
-    }
-
     if (flock != 0)
     {
         delete flock;

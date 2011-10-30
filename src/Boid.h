@@ -13,10 +13,11 @@ class Boid
     public:
         Boid(glm::vec3 position);
         virtual ~Boid();
-        void update();
+        void update(glm::vec3 separation, glm::vec3 flockHeading, glm::vec3 center);
         void draw();
         glm::vec3 getPosition();
         glm::vec3 getHeading();
+        glm::vec3 computeSeparation(Boid& b);
 
     private:
         glm::vec3 m_Position;
