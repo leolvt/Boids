@@ -101,8 +101,8 @@ glm::vec3 normalizeNeg(glm::vec3 vec, double limit)
 
 double computeAngle(glm::vec3 vec1, glm::vec3 vec2)
 {
-    vec1 = glm::normalize(vec1);
-    vec2 = glm::normalize(vec2);
+    vec1 /= glm::length(vec1) + 0.00001;
+    vec2 /= glm::length(vec2) + 0.00001;
     return glm::angle(vec2, vec1);
 }
 

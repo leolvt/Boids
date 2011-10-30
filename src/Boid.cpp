@@ -10,15 +10,26 @@ namespace Boids {
 
 // ============================================= //
 
+unsigned int Boid::s_FPS = 1;
+
+// ============================================= //
+
+void Boid::setFPS(unsigned int FPS)
+{
+    Boid::s_FPS = FPS;
+}
+
+// ============================================= //
+
 Boid::Boid(glm::vec3 pos)
 {
     this->m_Position = pos;
     this->m_Velocity = glm::vec3(0, 0, 0);
-    this->m_Up = glm::vec3(0, 1, 0);
     this->m_Heading = glm::vec3(0, 0, -1);
 
     this->m_AngleX = 0;
     this->m_AngleY = 0;
+    this->m_AngleZ = 0;
     this->m_NeckSize = 0.3 * 2;
     this->m_HeadHeight = 0.3 * 2;
     this->m_BodyHeight = 0.5 * 2;
@@ -30,9 +41,9 @@ Boid::Boid(glm::vec3 pos)
     this->m_WingTipHeight = 0.2 * 2;
     this->m_WingTipFlapX = 0.7 * 2;
     this->m_WingTipFlapZ = 0;
-    this->m_Angle = 0;
     this->m_FlapPhase = Util::getRandom()*Util::PI;
     this->m_FlapFactor = 1 + Util::getRandom();
+    this->m_FlapTick = 0;
 }
 
 // ============================================= //
@@ -87,6 +98,8 @@ void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
     float cohesionFactor = 1;
     float separationFactor = 1;
     float targetFactor = 1;
+    float sumOfFactors =
+        (alignmentFactor + cohesionFactor + separationFactor + targetFactor);
 
     /* Compute alignment component */
     glm::vec3 alignmentComp = (flockVelocity - m_Velocity);
@@ -108,49 +121,64 @@ void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
 
     /* Update Velocity */
     glm::vec3 sum = separationComp + alignmentComp + cohesionComp + targetComp;
-    sum /= (alignmentFactor + cohesionFactor + separationFactor + targetFactor);
+    sum /= sumOfFactors;
+    glm::vec3 oldVel = m_Velocity;
     m_Velocity = sum;
 
     /* Ensure Max Speed */
-    if (glm::length(m_Velocity) > 0.5)
+    double MaxSpeed = 5.0 / s_FPS;
+    if (glm::length(m_Velocity) > MaxSpeed)
     {
-        m_Velocity = glm::normalize(m_Velocity);
-        m_Velocity *= 0.5;
+        //m_Velocity = glm::normalize(m_Velocity);
+        m_Velocity /= glm::length(m_Velocity) + 0.00001;
+        m_Velocity *= MaxSpeed;
     }
 
     /* Update Heading based on new velocity */
-    m_Heading = glm::normalize(m_Heading + m_Velocity);
+    glm::vec3 oldHeading = m_Heading;
+    //m_Heading = glm::normalize(m_Heading + m_Velocity);
+    m_Heading = m_Heading + m_Velocity;
+    m_Heading /= glm::length(m_Heading) + 0.00001;
     glm::vec3 aux = m_Heading;
     glm::vec3 origHeading(0,0,-1);
 
-    // Compute Y Axix Rotation Angle
+    /* Update Position based on new velocity */
+    m_Position += m_Velocity;
+
+    // Compute Y Axix Rotation Angle (Yaw or Heading)
     aux = m_Heading;
     aux.y = 0;
     double y = glm::cross(origHeading, aux).y;
     m_AngleY = Util::computeAngle(origHeading, aux);
     m_AngleY *= y / glm::abs(y);
 
-    // Compute X Axix Rotation Angle
+    // Compute X Axix Rotation Angle (Pitch or Elevation)
     aux = m_Heading;
     aux.x = 0;
     double x = glm::cross(origHeading, aux).x;
     m_AngleX = Util::computeAngle(origHeading, aux);
     m_AngleX *= x / glm::abs(x);
 
-    /* Update Up based on Velocity */
-    //m_Up = mUp - m_Velocity;
+    // Compute Z Axis Rotation Angle (Roll or bank)
+    aux = m_Heading;
+    aux.y = 0;
+    double yTurn = glm::cross(aux, oldHeading).y;
+    double turnAngle = Util::computeAngle(m_Heading, oldHeading);
+    turnAngle *= -yTurn / glm::abs(yTurn);
+    double curveAngle = turnAngle * 50 * Util::normNegSigmoid(s_FPS,50);
+    m_AngleZ = curveAngle / 180 * 90; // Cap max roll at 90 degrees
 
-    /* Update Position based on new velocity */
-    m_Position += m_Velocity;
+    // When not in a steep curve, flap the wings
+    if (glm::abs(curveAngle) < 60.0)
+    {
+        m_FlapTick += 2*Util::PI / (s_FPS);
+    }
 
-    /* Compute Wing flapping */
-    float angleVariation = glm::cos(m_FlapFactor*glfwGetTime()*Util::PI + m_FlapPhase);
+    // Update the wing tip position
+    float angleVariation = glm::cos(m_FlapFactor*m_FlapTick + m_FlapPhase);
     float currAngle = 30.0/180*Util::PI * angleVariation;
     m_WingTipFlapX = m_WingLength * glm::cos(currAngle);
     m_WingTipFlapZ = m_WingLength * glm::sin(currAngle);
-
-    m_Angle = 360.0 * (glfwGetTime() / 4);
-
 }
 
 // ============================================= //
@@ -159,12 +187,12 @@ void Boid::draw()
 {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    //glRotatef(m_Angle, 0,1,0);
     glTranslatef(m_Position.x,m_Position.y, m_Position.z);
     glScalef(0.5, 0.5, 0.5);
-    //glRotatef(-90,0,0,1);
-    glRotatef(m_AngleY,0,1,0);
     glRotatef(m_AngleX,1,0,0);
+    glRotatef(m_AngleY,0,1,0);
+    glRotatef(m_AngleZ, 0,0,1);
+
 
     // Draw Head
     glBegin(GL_TRIANGLE_FAN);
@@ -181,8 +209,10 @@ void Boid::draw()
     glBegin(GL_TRIANGLE_FAN);
         glColor3f(1.0, 1.0, 0.0);
         glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+        glColor3f(0.0, 0.0, 1.0);
         glVertex3f(-m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
         glVertex3f(m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
+        glColor3f(1.0, 1.0, 0.0);
         glVertex3f(m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
         glVertex3f(-m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
         glVertex3f(-m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));

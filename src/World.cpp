@@ -17,7 +17,7 @@ namespace World {
 namespace {
 
 /* Define some variables to control FPS and Game Update Rate */
-const int TICKS_PER_SECOND = 10;
+const int TICKS_PER_SECOND = 50;
 const float SKIP_TICKS = 1.0 / TICKS_PER_SECOND;
 const int MAX_FRAMESKIP = 10;
 
@@ -32,6 +32,7 @@ float upZ = 0;
 float eyeRadius = 10;
 float eyeTheta = 0.0;
 float eyePhi = 0.0;
+glm::vec3 center(0,0,0);
 
 /* Th flock of boids*/
 Flock* flock = 0;
@@ -50,8 +51,11 @@ void initialize()
     glfwSetKeyCallback(keyPressed);
     glEnable(GL_DEPTH_TEST);
 
+    // Inform the boids about the FPS
+    Boid::setFPS(TICKS_PER_SECOND);
+
     // Create the flock
-    flock = new Flock(500);
+    flock = new Flock(100);
 }
 
 // ============================================= //
@@ -102,6 +106,17 @@ void keyPressed(int key, int status)
 void update()
 {
     if (flock != 0) flock->update();
+    /*
+    center = flock->computeFlockCenter();
+    center.x = 0;
+    center.y = 0;
+    glm::vec3 pos = center;
+    pos.z += 10;
+
+    eyeX = pos.x;
+    eyeY = pos.y;
+    eyeZ = pos.z;
+    */
 }
 
 // ============================================= //
@@ -114,7 +129,7 @@ void draw()
     // Place Camera
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(eyeX, eyeY, eyeZ,   0, 0, 0,   upX, upY, upZ);
+    gluLookAt(eyeX, eyeY, eyeZ,   center.x, center.y, center.z,   upX, upY, upZ);
 
     // Set Perspective
     glMatrixMode(GL_PROJECTION);
@@ -136,7 +151,6 @@ void run()
 {
     std::cout << "Starting Main Loop." << std::endl;
     glClearColor(1.0, 1.0, 1.0, 1.0);
-
 
     double nextGameTick = glfwGetTime();
     int loops;
