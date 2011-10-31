@@ -22,24 +22,23 @@ Flock::Flock(unsigned int numBoids)
         glm::vec3 pos(x,y,z);
         this->boids.push_back( Boid(pos) );
     }
+
 }
 
 // ============================================= //
 
 Flock::~Flock()
 {
-
 }
 
 // ============================================= //
 
-void Flock::update()
+void Flock::update(glm::vec3 target)
 {
     /* The vectors which influentiate the boids' speed */
     glm::vec3 separation;
     glm::vec3 flockVelocity = computeFlockVelocity();
     glm::vec3 center = computeFlockCenter();
-    glm::vec3 target(0, 0, -20);
 
     /* Update each Boid */
     for (auto boid = boids.begin(); boid != boids.end(); boid++)

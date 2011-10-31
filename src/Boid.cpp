@@ -44,6 +44,9 @@ Boid::Boid(glm::vec3 pos)
     this->m_FlapPhase = Util::getRandom()*Util::PI;
     this->m_FlapFactor = 1 + Util::getRandom();
     this->m_FlapTick = 0;
+
+    this->m_Yaw_Constant_Rotation = 0.0;
+    this->m_Pitch_Constant_Rotation = 0.0;
 }
 
 // ============================================= //
@@ -76,6 +79,13 @@ glm::vec3 Boid::getHeading()
 
 // ============================================= //
 
+void Boid::setVelocity(glm::vec3 newVelocity)
+{
+    m_Velocity = newVelocity;
+}
+
+// ============================================= //
+
 glm::vec3 Boid::computeSeparation(Boid& b)
 {
     // Compute the separation between the two boids
@@ -90,81 +100,92 @@ glm::vec3 Boid::computeSeparation(Boid& b)
 
 // ============================================= //
 
-void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
-                  glm::vec3 center, glm::vec3 target)
+void Boid::rotatePitch(double degrees)
 {
-    /* Some factors */
-    float alignmentFactor = 1;
-    float cohesionFactor = 1;
-    float separationFactor = 1;
-    float targetFactor = 1;
-    float sumOfFactors =
-        (alignmentFactor + cohesionFactor + separationFactor + targetFactor);
+    if (degrees < -90.0) degrees = -89.0;
+    if (degrees > 90.0) degrees = 89.0;
+    glm::vec3 head = glm::vec3(0, 0, -1);
+    head = Util::rotateAtTheta(head, degrees);
+    m_Heading = head + (m_Heading - glm::vec3(0, 0, -1));
 
-    /* Compute alignment component */
-    glm::vec3 alignmentComp = (flockVelocity - m_Velocity);
-    alignmentComp *= alignmentFactor;
+    glm::vec3 vel = m_Velocity;
+    vel = Util::rotateAtTheta(vel, degrees);
+    m_Velocity = vel;
 
-    /* Compute cohesion component */
-    glm::vec3 cohesionComp = (center - m_Position);
-    cohesionComp = Util::normalize(cohesionComp, 2.5);
-    cohesionComp *= cohesionFactor;
+    std::cout << "Degrees:" << degrees << std::endl;
+    std::cout << "X:" << vel.x << std::endl;
+    std::cout << "Y: " << vel.y << std::endl;
+    std::cout << "Z: " << vel.z << std::endl;
+}
 
-    /* Compute separation component */
-    glm::vec3 separationComp = separation;
-    separationComp *= separationFactor;
+// ============================================= //
 
-    /* Compute target component */
-    glm::vec3 targetComp = (target - m_Position);
-    targetComp = Util::normalize(targetComp, 1.5);
-    targetComp *= targetFactor;
+void Boid::rotateYaw(double degrees)
+{
+    if (degrees < -180.0) degrees = -180.0;
+    if (degrees > 180.0) degrees = 180.0;
+    glm::vec3 head = glm::vec3(0, 0, -1);
+    head = Util::rotateAtPhi(head, degrees);
+    m_Heading = head + (m_Heading - glm::vec3(0, 0, -1));
 
-    /* Update Velocity */
-    glm::vec3 sum = separationComp + alignmentComp + cohesionComp + targetComp;
-    sum /= sumOfFactors;
-    glm::vec3 oldVel = m_Velocity;
-    m_Velocity = sum;
+    glm::vec3 vel = m_Velocity;
+    vel = Util::rotateAtPhi(vel, degrees);
+    m_Velocity = vel;
+}
 
-    /* Ensure Max Speed */
+// ============================================= //
+
+void Boid::update()
+{
+    // Ensure Max Speed
     double MaxSpeed = 5.0 / s_FPS;
     if (glm::length(m_Velocity) > MaxSpeed)
     {
-        //m_Velocity = glm::normalize(m_Velocity);
         m_Velocity /= glm::length(m_Velocity) + 0.00001;
         m_Velocity *= MaxSpeed;
     }
 
-    /* Update Heading based on new velocity */
+    // Update Heading based on new velocity
     glm::vec3 oldHeading = m_Heading;
-    //m_Heading = glm::normalize(m_Heading + m_Velocity);
     m_Heading = m_Heading + m_Velocity;
     m_Heading /= glm::length(m_Heading) + 0.00001;
     glm::vec3 aux = m_Heading;
     glm::vec3 origHeading(0,0,-1);
 
-    /* Update Position based on new velocity */
+    // Update Position based on new velocity
     m_Position += m_Velocity;
 
     // Compute Y Axix Rotation Angle (Yaw or Heading)
     aux = m_Heading;
     aux.y = 0;
     double y = glm::cross(origHeading, aux).y;
-    m_AngleY = Util::computeAngle(origHeading, aux);
-    m_AngleY *= y / glm::abs(y);
+    if (y == 0) m_AngleY = 0;
+    else
+    {
+        m_AngleY = Util::computeAngle(origHeading, aux);
+        m_AngleY *= y / glm::abs(y);
+    }
 
     // Compute X Axix Rotation Angle (Pitch or Elevation)
     aux = m_Heading;
     aux.x = 0;
     double x = glm::cross(origHeading, aux).x;
-    m_AngleX = Util::computeAngle(origHeading, aux);
-    m_AngleX *= x / glm::abs(x);
+    if (x == 0) m_AngleX = 0;
+    else
+    {
+        m_AngleX = Util::computeAngle(origHeading, aux);
+        m_AngleX *= x / glm::abs(x);
+    }
 
     // Compute Z Axis Rotation Angle (Roll or bank)
     aux = m_Heading;
     aux.y = 0;
     double yTurn = glm::cross(aux, oldHeading).y;
     double turnAngle = Util::computeAngle(m_Heading, oldHeading);
-    turnAngle *= -yTurn / glm::abs(yTurn);
+    if (yTurn != 0)
+    {
+        turnAngle *= -yTurn / glm::abs(yTurn);
+    }
     double curveAngle = turnAngle * 50 * Util::normNegSigmoid(s_FPS,50);
     m_AngleZ = curveAngle / 180 * 90; // Cap max roll at 90 degrees
 
@@ -183,15 +204,56 @@ void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
 
 // ============================================= //
 
+void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
+                  glm::vec3 center, glm::vec3 target)
+{
+    // Some factors
+    float alignmentFactor = 1;
+    float cohesionFactor = 1;
+    float separationFactor = 1;
+    float targetFactor = 1;
+    float sumOfFactors =
+        (alignmentFactor + cohesionFactor + separationFactor + targetFactor);
+
+    // Compute alignment component
+    glm::vec3 alignmentComp = (flockVelocity - m_Velocity);
+    alignmentComp *= alignmentFactor;
+
+    // Compute cohesion component
+    glm::vec3 cohesionComp = (center - m_Position);
+    cohesionComp = Util::normalize(cohesionComp, 2.5);
+    cohesionComp *= cohesionFactor;
+
+    // Compute separation component
+    glm::vec3 separationComp = separation;
+    separationComp *= separationFactor;
+
+    // Compute target component
+    glm::vec3 targetComp = (target - m_Position);
+    targetComp = Util::normalize(targetComp, 1.5);
+    targetComp *= targetFactor;
+
+    // Update Velocity
+    glm::vec3 sum = separationComp + alignmentComp + cohesionComp + targetComp;
+    sum /= sumOfFactors;
+    glm::vec3 oldVel = m_Velocity;
+    m_Velocity = sum;
+
+    // Update normally
+    update();
+}
+
+// ============================================= //
+
 void Boid::draw()
 {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    glTranslatef(m_Position.x,m_Position.y, m_Position.z);
+    glTranslatef(m_Position.x, m_Position.y, m_Position.z);
     glScalef(0.5, 0.5, 0.5);
-    glRotatef(m_AngleX,1,0,0);
-    glRotatef(m_AngleY,0,1,0);
-    glRotatef(m_AngleZ, 0,0,1);
+    glRotatef(m_AngleX, 1, 0, 0);
+    glRotatef(m_AngleY, 0, 1, 0);
+    glRotatef(m_AngleZ, 0, 0, 1);
 
 
     // Draw Head

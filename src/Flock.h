@@ -16,7 +16,7 @@ class Flock
     public:
         Flock(unsigned int numBoids);
         virtual ~Flock();
-        void update();
+        void update(glm::vec3 target);
         void draw();
         glm::vec3 computeFlockCenter();
     private:

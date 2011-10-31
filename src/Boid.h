@@ -13,13 +13,17 @@ class Boid
     public:
         Boid(glm::vec3 position);
         virtual ~Boid();
+        void update();
         void update(glm::vec3 separation, glm::vec3 flockVelocity,
                     glm::vec3 center, glm::vec3 target);
         void draw();
         glm::vec3 getPosition();
         glm::vec3 getHeading();
         glm::vec3 getVelocity();
+        void setVelocity(glm::vec3 newVelocity);
         glm::vec3 computeSeparation(Boid& b);
+        void rotateYaw(double degrees);
+        void rotatePitch(double degrees);
 
         static void setFPS(unsigned int FPS);
 
@@ -45,6 +49,9 @@ class Boid
         float m_FlapPhase;
         float m_FlapFactor;
         float m_FlapTick;
+
+        double m_Yaw_Constant_Rotation;
+        double m_Pitch_Constant_Rotation;
 
         static unsigned int s_FPS;
 };

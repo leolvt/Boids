@@ -34,7 +34,10 @@ float eyeTheta = 0.0;
 float eyePhi = 0.0;
 glm::vec3 center(0,0,0);
 
-/* Th flock of boids*/
+// The leader
+Boid* leader = 0;
+
+// The flock of boids
 Flock* flock = 0;
 
 };
@@ -54,8 +57,30 @@ void initialize()
     // Inform the boids about the FPS
     Boid::setFPS(TICKS_PER_SECOND);
 
+    // Create the Leader
+    leader = new Boid(glm::vec3(0,0,0));
+    leader->setVelocity(glm::vec3(0,0,-1));
+
     // Create the flock
     flock = new Flock(100);
+
+    std::cout << "sin(30) = " << glm::sin(30.0) << std::endl;
+
+    glm::vec3 car(1,1,1);
+    glm::vec3 sphe = Util::cartesianToSpherical(car);
+    std::cout << "R:" << sphe.x << std::endl;
+    std::cout << "theta: " << sphe.y << std::endl;
+    std::cout << "phi: " << sphe.z << std::endl;
+
+    sphe.z = (-135)*Util::PI/180;
+    std::cout << "New Phi: " << sphe.z << std::endl;
+
+    car = Util::sphericalToCartesian(sphe);
+    std::cout << "X:" << car.x << std::endl;
+    std::cout << "Y: " << car.y << std::endl;
+    std::cout << "Z: " << car.z << std::endl;
+
+    //exit(0);
 }
 
 // ============================================= //
@@ -63,60 +88,37 @@ void initialize()
 void keyPressed(int key, int status)
 {
     if(status == GLFW_RELEASE) return;
+
+    double angleInc = 15.0;
     if(key == GLFW_KEY_LEFT)
     {
-        eyePhi -= DELTA_ANGLE;
-        if(eyePhi < 0) eyePhi += 2 * Util::PI;
-        if(eyePhi > 2 * Util::PI) eyePhi -= 2 * Util::PI;
+        leader->rotateYaw(-angleInc);
     }
     else if(key == GLFW_KEY_RIGHT)
     {
-        eyePhi += DELTA_ANGLE;
-        if(eyePhi < 0) eyePhi += 2 * Util::PI;
-        if(eyePhi > 2 * Util::PI) eyePhi -= 2 * Util::PI;
+        leader->rotateYaw(+angleInc);
     }
     else if(key == GLFW_KEY_UP)
     {
-        eyeTheta += DELTA_ANGLE;
-        if(eyeTheta < -Util::PI / 2) eyeTheta = -Util::PI / 2;
-        if(eyeTheta > Util::PI / 2) eyeTheta = Util::PI / 2;
+        leader->rotatePitch(angleInc);
     }
     else if(key == GLFW_KEY_DOWN)
     {
-        eyeTheta -= DELTA_ANGLE;
-        if(eyeTheta < -Util::PI / 2) eyeTheta = -Util::PI / 2;
-        if(eyeTheta > Util::PI / 2) eyeTheta = Util::PI / 2;
+        leader->rotatePitch(-angleInc);
     }
 
-    // Compute OpenGL Coordinates (Cartesian)
-    eyeX = eyeRadius * cos(eyeTheta) * sin(eyePhi);
-    eyeY = eyeRadius * sin(eyeTheta);
-    eyeZ = eyeRadius * cos(eyeTheta) * cos(eyePhi);
-
-    upX = eyeRadius * cos(eyeTheta + 0.1) * sin(eyePhi) - eyeX;
-    upY = eyeRadius * sin(eyeTheta + 0.1) - eyeY;
-    upZ = eyeRadius * cos(eyeTheta + 0.1) * cos(eyePhi) - eyeZ;
-
-    std::cout << "Eye Polar (T, P): " << eyeTheta << ", " << eyePhi << std::endl;
-    std::cout << "Eye at: " << eyeX << ", " << eyeY << ", " << eyeZ << std::endl << std::endl;
 }
 
 // ============================================= //
 
 void update()
 {
-    if (flock != 0) flock->update();
-    /*
-    center = flock->computeFlockCenter();
-    center.x = 0;
-    center.y = 0;
-    glm::vec3 pos = center;
-    pos.z += 10;
+    // Update the leader
+    if (leader != 0) leader->update();
 
-    eyeX = pos.x;
-    eyeY = pos.y;
-    eyeZ = pos.z;
-    */
+    // Update the flock
+    //if (flock != 0) flock->update( leader->getPosition() );
+    if (flock != 0) flock->update( glm::vec3(0,-5,-10) );
 }
 
 // ============================================= //
@@ -137,10 +139,11 @@ void draw()
     gluPerspective(60.0, 1.33, 1.6, 100);
     glMatrixMode(GL_MODELVIEW);
 
-    if (flock != 0)
-    {
-        flock->draw();
-    }
+    // Draw the leader
+    if (leader != 0) leader->draw();
+
+    // Draw the flock
+    if (flock != 0) flock->draw();
 
     glfwSwapBuffers();
 }
