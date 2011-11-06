@@ -137,6 +137,102 @@ void Boid::rotateYaw(double degrees)
 
 void Boid::update()
 {
+    step(
+        glm::vec3(0,0,0), // Separation Component
+        glm::vec3(0,0,0), // Alignment Component
+        glm::vec3(0,0,0), // Cohesion Component
+        glm::vec3(0,0,0), // Target Component
+        glm::vec3(0,0,0), // Floor Component
+        glm::vec3(0,0,0)  // Tower Component
+    );
+}
+
+// ============================================= //
+
+void Boid::update(glm::vec3 target)
+{
+    // Compute target component
+    glm::vec3 targetComp = (target - m_Position);
+    targetComp = Util::normalize(targetComp, 1.5);
+
+    step(
+        glm::vec3(0,0,0), // Separation Component
+        glm::vec3(0,0,0), // Alignment Component
+        glm::vec3(0,0,0), // Cohesion Component
+        targetComp,       // Target Component
+        glm::vec3(0,0,0), // Floor Component
+        glm::vec3(0,0,0)  // Tower Component
+    );
+}
+
+// ============================================= //
+
+void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
+                  glm::vec3 center, glm::vec3 target)
+{
+    // Compute alignment component
+    glm::vec3 alignmentComp = (flockVelocity - m_Velocity);
+
+    // Compute cohesion component
+    glm::vec3 cohesionComp = (center - m_Position);
+    cohesionComp = Util::normalize(cohesionComp, 2.5);
+
+    // Compute separation component
+    glm::vec3 separationComp = separation;
+
+    // Compute target component
+    glm::vec3 targetComp = (target - m_Position);
+    targetComp = Util::normalize(targetComp, 1.5);
+
+    // Compute floor component
+    glm::vec3 floorComp = glm::vec3(0, 1, 0);
+    floorComp *= Util::normNegSigmoid(m_Position.y, 1.5);
+
+    // Compute tower component
+    glm::vec3 towerComp(0,0,0);
+    if (m_Position.y < 25)
+    {
+        towerComp = m_Position - glm::vec3(0, m_Position.y, 0);
+        towerComp *= Util::normalizeNeg(towerComp, 5);
+        towerComp *= 10;
+    }
+
+    // Step in
+    step(separationComp, alignmentComp, cohesionComp, targetComp, floorComp, towerComp);
+}
+
+// ============================================= //
+
+void Boid::step(glm::vec3 separationComp, glm::vec3 alignmentComp,
+                glm::vec3 cohesionComp, glm::vec3 targetComp,
+                glm::vec3 floorComp, glm::vec3 towerComp)
+{
+    // Some factors
+    float alignmentFactor = 1;
+    float cohesionFactor = 1;
+    float separationFactor = 1;
+    float targetFactor = 1;
+    float floorFactor = 1;
+    float towerFactor = 1;
+    float sumOfFactors = (
+        alignmentFactor + cohesionFactor + separationFactor +
+        targetFactor + floorFactor + towerFactor
+    );
+
+    alignmentComp *= alignmentFactor;
+    cohesionComp *= cohesionFactor;
+    separationComp *= separationFactor;
+    targetComp *= targetFactor;
+    floorComp *= floorFactor;
+    towerComp *= towerFactor;
+
+    // Update Velocity
+    glm::vec3 sum = separationComp + alignmentComp + cohesionComp + targetComp +
+                    floorComp + towerComp;
+    sum /= sumOfFactors;
+    glm::vec3 oldVel = m_Velocity;
+    m_Velocity = sum;
+
     // Ensure Max Speed
     double MaxSpeed = 5.0 / s_FPS;
     if (glm::length(m_Velocity) > MaxSpeed)
@@ -200,47 +296,6 @@ void Boid::update()
     float currAngle = 30.0/180*Util::PI * angleVariation;
     m_WingTipFlapX = m_WingLength * glm::cos(currAngle);
     m_WingTipFlapZ = m_WingLength * glm::sin(currAngle);
-}
-
-// ============================================= //
-
-void Boid::update(glm::vec3 separation, glm::vec3 flockVelocity,
-                  glm::vec3 center, glm::vec3 target)
-{
-    // Some factors
-    float alignmentFactor = 1;
-    float cohesionFactor = 1;
-    float separationFactor = 1;
-    float targetFactor = 1;
-    float sumOfFactors =
-        (alignmentFactor + cohesionFactor + separationFactor + targetFactor);
-
-    // Compute alignment component
-    glm::vec3 alignmentComp = (flockVelocity - m_Velocity);
-    alignmentComp *= alignmentFactor;
-
-    // Compute cohesion component
-    glm::vec3 cohesionComp = (center - m_Position);
-    cohesionComp = Util::normalize(cohesionComp, 2.5);
-    cohesionComp *= cohesionFactor;
-
-    // Compute separation component
-    glm::vec3 separationComp = separation;
-    separationComp *= separationFactor;
-
-    // Compute target component
-    glm::vec3 targetComp = (target - m_Position);
-    targetComp = Util::normalize(targetComp, 1.5);
-    targetComp *= targetFactor;
-
-    // Update Velocity
-    glm::vec3 sum = separationComp + alignmentComp + cohesionComp + targetComp;
-    sum /= sumOfFactors;
-    glm::vec3 oldVel = m_Velocity;
-    m_Velocity = sum;
-
-    // Update normally
-    update();
 }
 
 // ============================================= //

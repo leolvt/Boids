@@ -13,6 +13,7 @@ void terminate();
 
 /* Callback functions */
 void keyPressed(int key, int status);
+void resized(int width, int height);
 
 // ============================================= //
 

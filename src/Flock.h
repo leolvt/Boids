@@ -20,6 +20,9 @@ class Flock
         void draw();
         glm::vec3 computeFlockCenter();
         glm::vec3 computeFlockHeading();
+        unsigned int getNumBoids();
+        void addBoid();
+        void deleteBoid();
     private:
         glm::vec3 computeFlockVelocity();
         glm::vec3 computeBoidSeparation(std::vector<Boid>::iterator currBoid);

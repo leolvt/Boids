@@ -12,15 +12,10 @@ namespace Boids {
 
 Flock::Flock(unsigned int numBoids)
 {
-    this->m_NumBoids = numBoids;
+    m_NumBoids = 0;
     while (numBoids-- > 0)
     {
-        double x = Util::getRandom() * 6 - 3;
-        double y = Util::getRandom() * 6 - 3;
-        double z = Util::getRandom() * 6;
-        if (x==0) x++;  if (y==0) y++;  if (z==0) z++;
-        glm::vec3 pos(x,y,z);
-        this->boids.push_back( Boid(pos) );
+        addBoid();
     }
 
 }
@@ -112,4 +107,36 @@ void Flock::draw()
 
 // ============================================= //
 
+unsigned int Flock::getNumBoids()
+{
+    return m_NumBoids;
+}
+
+// ============================================= //
+
+void Flock::addBoid()
+{
+    double x = Util::getRandom() * 40 - 20;
+    double y = Util::getRandom() * 6 + 3;
+    double z = Util::getRandom() * 40 - 20;
+    if (x==0) x++;  if (y==0) y++;  if (z==0) z++;
+    glm::vec3 pos(x,y,z);
+    this->boids.push_back( Boid(pos) );
+    this->m_NumBoids++;
+}
+
+// ============================================= //
+
+void Flock::deleteBoid()
+{
+    if (m_NumBoids > 0)
+    {
+        int idx = (int) (Util::getRandom() * m_NumBoids);
+        if (idx == m_NumBoids) idx--;
+        boids.erase( boids.begin() + idx );
+        m_NumBoids--;
+    }
+}
+
+// ============================================= //
 };

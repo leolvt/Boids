@@ -42,8 +42,8 @@ double getRandom()
 double normNegSigmoid(double val, double limit)
 {
     // Compute a normalization factor based on a sigmoid function.
-    // When val -> limit,  fac -> 1,
-    // when val -> 0,      fac -> 0
+    // When val -> limit,  fac -> 0,
+    // when val -> 0,      fac -> 1
     double fac = 1/(1 + glm::exp(-9/limit*(limit/2-val)));
     return fac;
 }
@@ -86,8 +86,8 @@ glm::vec3 normalizeNeg(glm::vec3 vec, double limit)
     double length = glm::length(vec);
 
     // Compute a normalization factor based on a sigmoid function.
-    // When length -> limit,  fac -> 1,
-    // when length -> 0,      fac -> 0
+    // When length -> limit,  fac -> 0,
+    // when length -> 0,      fac -> 1
     double fac = Util::normNegSigmoid(length, limit);
 
     // Return the vector normalized by the factor above

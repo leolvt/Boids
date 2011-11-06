@@ -13,21 +13,31 @@ class Boid
     public:
         Boid(glm::vec3 position);
         virtual ~Boid();
+
         void update();
+        void update(glm::vec3 target);
         void update(glm::vec3 separation, glm::vec3 flockVelocity,
                     glm::vec3 center, glm::vec3 target);
+
         void draw();
+
         glm::vec3 getPosition();
         glm::vec3 getHeading();
         glm::vec3 getVelocity();
+
         void setVelocity(glm::vec3 newVelocity);
         glm::vec3 computeSeparation(Boid& b);
+
         void rotateYaw(double degrees);
         void rotatePitch(double degrees);
 
         static void setFPS(unsigned int FPS);
 
     private:
+        void step(glm::vec3 separationComp, glm::vec3 alignmentComp,
+                 glm::vec3 cohesionComp, glm::vec3 targetComp,
+                 glm::vec3 floorComp, glm::vec3 towerComp);
+
         glm::vec3 m_Position;
         glm::vec3 m_Heading;
         glm::vec3 m_Velocity;
