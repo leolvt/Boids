@@ -36,7 +36,7 @@ glm::vec3 center(0,0,0);
 glm::vec3 up(0,1,0);
 glm::vec3 eye(0,0,10);
 float aspectRatio = 800.0/600.0;
-ViewModes cameraMode = TOP_TOWER;
+ViewModes cameraMode = TOP_VIEW;
 
 // The Floor
 glm::vec4 floorColor(1.0, 1.0, 0.0, 1.0);
@@ -47,8 +47,18 @@ glm::mat4 floorPos(
     10.0, 0.0, 10.0, 1.0
 );
 
+// Possible Leader Modes
+enum LeaderModes
+{
+    RANDOM_POSITION,
+    CIRCLE
+};
+
 // The leader
 Boid* leader = 0;
+LeaderModes leaderMode = CIRCLE;
+glm::vec3 leaderGoal(5,5,5);
+int lastUpdated = 0;
 
 // The flock of boids
 Flock* flock = 0;
@@ -97,10 +107,25 @@ void initialize()
 void update()
 {
     // Update the leader
-    glm::vec3 leaderGoal(50, 10, 50);
-    leaderGoal.x *= glm::cos(glfwGetTime() * Util::PI / 8);
-    leaderGoal.z *= -glm::sin(glfwGetTime() * Util::PI / 8);
-    if (leader != 0) leader->update(leaderGoal);
+    if (leaderMode == RANDOM_POSITION)
+    {
+        int current = (int) glfwGetTime();
+        if (lastUpdated != current && current % 4 == 0)
+        {
+            leaderGoal.x = Util::getRandom() * 40 - 20;
+            leaderGoal.y = Util::getRandom() * 20;
+            leaderGoal.z = Util::getRandom() * 40 - 20;
+            lastUpdated = current;
+        }
+        if (leader != 0) leader->update(leaderGoal);
+    }
+    else
+    {
+        leaderGoal = glm::vec3(50, 10, 50);
+        leaderGoal.x *= glm::cos(glfwGetTime() * Util::PI / 8);
+        leaderGoal.z *= -glm::sin(glfwGetTime() * Util::PI / 8);
+        if (leader != 0) leader->update(leaderGoal);
+    }
 
     // Update the flock
     glm::vec3 leaderHeading = leader->getHeading();
@@ -133,7 +158,7 @@ void update()
     }
     else
     {
-        eye = glm::vec3(0, 30, 0);
+        eye = glm::vec3(0, 50, 0);
         up = glm::vec3(0,0,-1);
         center = glm::vec3(0, 0, 0);
     }
@@ -258,6 +283,7 @@ void print()
     std::cout << "Eye: (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
     std::cout << "Center: (" << center.x << ", " << center.y << ", " << center.z << ")" << std::endl;
     std::cout << "Leader: (" << leader->getPosition().x << ", " << leader->getPosition().y << ", " << leader->getPosition().z << ")" << std::endl;
+    std::cout << "Leader Goal: (" << leaderGoal.x << ", " << leaderGoal.y << ", " << leaderGoal.z << ")" << std::endl;
     std::cout << "Num. Boids: " << flock->getNumBoids() << std::endl;
     std::cout << "--------------------" << std::endl;
 }
@@ -288,6 +314,8 @@ void keyPressed(int key, int status)
     else if (key == GLFW_KEY_KP_5) cameraMode = TOP_TOWER;
     else if (key == GLFW_KEY_KP_1) cameraMode = BEHIND;
     else if (key == GLFW_KEY_KP_3) cameraMode = SIDE_VIEW;
+    else if (key == GLFW_KEY_F1) leaderMode = RANDOM_POSITION;
+    else if (key == GLFW_KEY_F2) leaderMode = CIRCLE;
 }
 
 // ============================================= //
