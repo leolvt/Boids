@@ -254,59 +254,181 @@ void Boid::draw()
     glRotatef(m_AngleX, 1, 0, 0);
     glRotatef(m_AngleY, 0, 1, 0);
     glRotatef(m_AngleZ, 0, 0, 1);
+    glRotatef(180, 1, 0, 0);
 
+    float boidSpec[] = {0.1, 0.1, 0.1, 1.0};
+    float boidEmis[] = {0.0, 0.0, 0.0, 1.0};
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, boidSpec);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, boidEmis);
+    //glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.35);
+    glm::vec3 norm;
 
     // Draw Head
-    glBegin(GL_TRIANGLE_FAN);
-        glColor3f(1.0, 0.0, 0.0);
-        glVertex3f(0.0,0.0,-(1.0));
+    glBegin(GL_TRIANGLES);
+        glColor4f(1.0, 0.0, 0.0, 0.0);
+        norm =
+        glm::cross(glm::vec3(-m_NeckSize/2, m_NeckSize/2, m_HeadHeight),
+                   glm::vec3(m_NeckSize/2, m_NeckSize/2, m_HeadHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0, 0.0,-(1.0));
         glVertex3f(-m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
         glVertex3f(m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
-        glVertex3f(m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(-m_NeckSize/2, -m_NeckSize/2, m_HeadHeight),
+                   glm::vec3(-m_NeckSize/2, m_NeckSize/2, m_HeadHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0, 0.0,-(1.0));
         glVertex3f(-m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
         glVertex3f(-m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(m_NeckSize/2, m_NeckSize/2, m_HeadHeight),
+                   glm::vec3(m_NeckSize/2, -m_NeckSize/2, m_HeadHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0, 0.0,-(1.0));
+        glVertex3f(m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
+        glVertex3f(m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(m_NeckSize/2, -m_NeckSize/2, m_HeadHeight),
+                   glm::vec3(-m_NeckSize/2, -m_NeckSize/2, m_HeadHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0, 0.0,-(1.0));
+        glVertex3f(m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
+        glVertex3f(-m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
     glEnd();
 
     // Draw Body
-    glBegin(GL_TRIANGLE_FAN);
+    glBegin(GL_TRIANGLES);
         glColor3f(1.0, 1.0, 0.0);
+
+        norm =
+        glm::cross(glm::vec3(m_NeckSize/2, m_NeckSize/2, -m_BodyHeight),
+                   glm::vec3(-m_NeckSize/2, m_NeckSize/2, -m_BodyHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
         glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
-        glColor3f(0.0, 0.0, 1.0);
-        glVertex3f(-m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
         glVertex3f(m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
-        glColor3f(1.0, 1.0, 0.0);
-        glVertex3f(m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
-        glVertex3f(-m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
         glVertex3f(-m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(-m_NeckSize/2, -m_NeckSize/2, -m_BodyHeight),
+                   glm::vec3(m_NeckSize/2, -m_NeckSize/2, -m_BodyHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+        glVertex3f(-m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
+        glVertex3f(m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(-m_NeckSize/2, m_NeckSize/2, -m_BodyHeight),
+                   glm::vec3(-m_NeckSize/2, -m_NeckSize/2, -m_BodyHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+        glVertex3f(-m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
+        glVertex3f(-m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(m_NeckSize/2, m_NeckSize/2, -m_BodyHeight),
+                   glm::vec3(m_NeckSize/2, -m_NeckSize/2, -m_BodyHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+        glVertex3f(m_NeckSize/2,m_NeckSize/2,-(1-m_HeadHeight));
+        glVertex3f(m_NeckSize/2,-m_NeckSize/2,-(1-m_HeadHeight));
     glEnd();
 
+
     // Draw Tail
-    glBegin(GL_TRIANGLE_FAN);
+    glBegin(GL_TRIANGLES);
         glColor3f(1.0, 0.5, 0.0);
+
+        norm =
+        glm::cross(glm::vec3(-m_TailLength/2, m_TailWidth/2, m_TailHeight),
+                   glm::vec3(m_TailLength/2, m_TailWidth/2, m_TailHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
         glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
         glVertex3f(-m_TailLength/2,m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
         glVertex3f(m_TailLength/2,m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
+
+        norm =
+        glm::cross(glm::vec3(m_TailLength/2, m_TailWidth/2, m_TailHeight),
+                   glm::vec3(m_TailLength/2, -m_TailWidth/2, m_TailHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+        glVertex3f(m_TailLength/2,m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
+        glVertex3f(m_TailLength/2,-m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
+
+        norm =
+        glm::cross(glm::vec3(m_TailLength/2, -m_TailWidth/2, m_TailHeight),
+                   glm::vec3(-m_TailLength/2, -m_TailWidth/2, m_TailHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
         glVertex3f(m_TailLength/2,-m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
         glVertex3f(-m_TailLength/2,-m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
+
+        norm =
+        glm::cross(glm::vec3(-m_TailLength/2, -m_TailWidth/2, m_TailHeight),
+                   glm::vec3(-m_TailLength/2, m_TailWidth/2, m_TailHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+        glVertex3f(-m_TailLength/2,-m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
         glVertex3f(-m_TailLength/2,m_TailWidth/2,-(1-m_HeadHeight-m_BodyHeight-m_TailHeight));
+
     glEnd();
 
     // Draw Right Wing
-    glBegin(GL_TRIANGLE_FAN);
+    glBegin(GL_TRIANGLES);
         glColor3f(0.2, 1.0, 0.0);
+
+        norm =
+        glm::cross(glm::vec3(m_NeckSize/2-m_WingTipFlapX, -m_WingWidth/2-m_WingTipFlapZ, -m_BodyHeight+m_WingTipHeight),
+                   glm::vec3(m_NeckSize/2-m_WingTipFlapX, m_WingWidth/2-m_WingTipFlapZ,-m_BodyHeight+m_WingTipHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(m_WingTipFlapX,m_WingTipFlapZ,-(1-m_HeadHeight-m_BodyHeight+m_WingTipHeight));
+        glVertex3f(m_NeckSize/2,-m_WingWidth/2,-(1-m_HeadHeight));
+        glVertex3f(m_NeckSize/2,m_WingWidth/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(-m_WingTipFlapX, -m_WingTipFlapZ, m_WingTipHeight),
+                   glm::vec3(m_NeckSize/2-m_WingTipFlapX, -m_WingWidth/2-m_WingTipFlapZ, -m_BodyHeight+m_WingTipHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(m_WingTipFlapX,m_WingTipFlapZ,-(1-m_HeadHeight-m_BodyHeight+m_WingTipHeight));
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+        glVertex3f(m_NeckSize/2,-m_WingWidth/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(m_NeckSize/2-m_WingTipFlapX, m_WingWidth/2-m_WingTipFlapZ, -m_BodyHeight+m_WingTipHeight),
+                   glm::vec3(-m_WingTipFlapX, -m_WingTipFlapZ, m_WingTipHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
         glVertex3f(m_WingTipFlapX,m_WingTipFlapZ,-(1-m_HeadHeight-m_BodyHeight+m_WingTipHeight));
         glVertex3f(m_NeckSize/2,m_WingWidth/2,-(1-m_HeadHeight));
-        glVertex3f(m_NeckSize/2,-m_WingWidth/2,-(1-m_HeadHeight));
         glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
-        glVertex3f(m_NeckSize/2,m_WingWidth/2,-(1-m_HeadHeight));
     glEnd();
 
     // Draw Left Wing
     glBegin(GL_TRIANGLE_FAN);
         glColor3f(0.2, 1.0, 0.0);
+
+        norm =
+        glm::cross(glm::vec3(-m_NeckSize/2+m_WingTipFlapX, m_WingWidth/2-m_WingTipFlapZ, -m_BodyHeight+m_WingTipHeight),
+                   glm::vec3(-m_NeckSize/2+m_WingTipFlapX, -m_WingWidth/2-m_WingTipFlapZ, -m_BodyHeight+m_WingTipHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
         glVertex3f(-m_WingTipFlapX,m_WingTipFlapZ,-(1-m_HeadHeight-m_BodyHeight+m_WingTipHeight));
         glVertex3f(-m_NeckSize/2,m_WingWidth/2,-(1-m_HeadHeight));
         glVertex3f(-m_NeckSize/2,-m_WingWidth/2,-(1-m_HeadHeight));
+
+        norm =
+        glm::cross(glm::vec3(-m_NeckSize/2+m_WingTipFlapX, -m_WingWidth/2-m_WingTipFlapZ, -m_BodyHeight+m_WingTipHeight),
+                   glm::vec3(m_WingTipFlapX, -m_WingTipFlapZ, m_WingTipHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(-m_WingTipFlapX,m_WingTipFlapZ,-(1-m_HeadHeight-m_BodyHeight+m_WingTipHeight));
+        glVertex3f(-m_NeckSize/2,-m_WingWidth/2,-(1-m_HeadHeight));
+        glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
+
+        norm =
+        glm::cross(glm::vec3(m_WingTipFlapX, -m_WingTipFlapZ, m_WingTipHeight),
+                   glm::vec3(-m_NeckSize/2+m_WingTipFlapX, m_WingWidth/2-m_WingTipFlapZ, -m_BodyHeight+m_WingTipHeight));
+        glNormal3f(norm.x, norm.y, norm.z);
+        glVertex3f(-m_WingTipFlapX,m_WingTipFlapZ,-(1-m_HeadHeight-m_BodyHeight+m_WingTipHeight));
         glVertex3f(0.0,0.0,-(1.0-m_HeadHeight-m_BodyHeight));
         glVertex3f(-m_NeckSize/2,m_WingWidth/2,-(1-m_HeadHeight));
     glEnd();

@@ -25,13 +25,10 @@ const int MAX_FRAMESKIP = 10;
 const float DELTA_ANGLE = Util::PI / 36;
 float eyeX = 0;
 float eyeY = 0;
-float eyeZ = 10;
+float eyeZ = 30;
 float upX = 0;
 float upY = 1;
 float upZ = 0;
-float eyeRadius = 10;
-float eyeTheta = 0.0;
-float eyePhi = 0.0;
 glm::vec3 center(0,0,0);
 
 // The leader
@@ -52,7 +49,14 @@ void initialize()
     glfwOpenWindow(800, 600, 8, 8, 8, 8, 8, 0, GLFW_WINDOW);
     glfwSetWindowTitle("Boids - Bird-like flocking behaviour simulation");
     glfwSetKeyCallback(keyPressed);
+
+    // Enable Depth Test, Lighing, Lights ource and Color Material
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glShadeModel(GL_SMOOTH);
+    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+    glEnable(GL_COLOR_MATERIAL);
 
     // Inform the boids about the FPS
     Boid::setFPS(TICKS_PER_SECOND);
@@ -63,22 +67,6 @@ void initialize()
 
     // Create the flock
     flock = new Flock(100);
-
-    std::cout << "sin(30) = " << glm::sin(30.0) << std::endl;
-
-    glm::vec3 car(1,1,1);
-    glm::vec3 sphe = Util::cartesianToSpherical(car);
-    std::cout << "R:" << sphe.x << std::endl;
-    std::cout << "theta: " << sphe.y << std::endl;
-    std::cout << "phi: " << sphe.z << std::endl;
-
-    sphe.z = (-135)*Util::PI/180;
-    std::cout << "New Phi: " << sphe.z << std::endl;
-
-    car = Util::sphericalToCartesian(sphe);
-    std::cout << "X:" << car.x << std::endl;
-    std::cout << "Y: " << car.y << std::endl;
-    std::cout << "Z: " << car.z << std::endl;
 
     //exit(0);
 }
@@ -117,7 +105,7 @@ void update()
     if (leader != 0) leader->update();
 
     // Update the flock
-    //if (flock != 0) flock->update( leader->getPosition() );
+    if (flock != 0) flock->update( leader->getPosition() );
     if (flock != 0) flock->update( glm::vec3(0,-5,-10) );
 }
 
@@ -131,7 +119,17 @@ void draw()
     // Place Camera
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(eyeX, eyeY, eyeZ,   center.x, center.y, center.z,   upX, upY, upZ);
+    gluLookAt(eyeX, eyeY, eyeZ, center.x, center.y, center.z, upX, upY, upZ);
+
+    // Set Up Light Source
+    GLfloat lightPos[] = {5.0, 5.0, 5.0, 1.0f};
+    GLfloat ltAmbColor[] = {0.1f, 0.1f, 0.1f, 1.0f};
+    GLfloat ltDifColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat ltSpeColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ltAmbColor);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, ltDifColor);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, ltSpeColor);
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
     // Set Perspective
     glMatrixMode(GL_PROJECTION);
