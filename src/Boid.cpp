@@ -254,13 +254,11 @@ void Boid::draw()
     glRotatef(m_AngleX, 1, 0, 0);
     glRotatef(m_AngleY, 0, 1, 0);
     glRotatef(m_AngleZ, 0, 0, 1);
-    glRotatef(180, 1, 0, 0);
 
     float boidSpec[] = {0.1, 0.1, 0.1, 1.0};
     float boidEmis[] = {0.0, 0.0, 0.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, boidSpec);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, boidEmis);
-    //glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.35);
     glm::vec3 norm;
 
     // Draw Head

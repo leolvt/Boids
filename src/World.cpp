@@ -23,13 +23,9 @@ const int MAX_FRAMESKIP = 10;
 
 /* Camera related variables */
 const float DELTA_ANGLE = Util::PI / 36;
-float eyeX = 0;
-float eyeY = 0;
-float eyeZ = 30;
-float upX = 0;
-float upY = 1;
-float upZ = 0;
 glm::vec3 center(0,0,0);
+glm::vec3 up(0,1,0);
+glm::vec3 eye(0,0,10);
 
 // The leader
 Boid* leader = 0;
@@ -106,7 +102,13 @@ void update()
 
     // Update the flock
     if (flock != 0) flock->update( leader->getPosition() );
-    if (flock != 0) flock->update( glm::vec3(0,-5,-10) );
+    //if (flock != 0) flock->update( glm::vec3(0,-5,-10) );
+
+    // Update Camera position
+    glm::vec3 dist = flock->computeFlockHeading();
+    dist *= 10;
+    eye = flock->computeFlockCenter() - dist;
+    center = flock->computeFlockCenter();
 }
 
 // ============================================= //
@@ -119,7 +121,7 @@ void draw()
     // Place Camera
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(eyeX, eyeY, eyeZ, center.x, center.y, center.z, upX, upY, upZ);
+    gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);
 
     // Set Up Light Source
     GLfloat lightPos[] = {5.0, 5.0, 5.0, 1.0f};
@@ -151,7 +153,7 @@ void draw()
 void run()
 {
     std::cout << "Starting Main Loop." << std::endl;
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(0.85, 0.85, 1.0, 1.0);
 
     double nextGameTick = glfwGetTime();
     int loops;
