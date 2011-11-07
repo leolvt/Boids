@@ -61,6 +61,14 @@ double normSigmoid(double val, double limit)
 
 // ============================================= //
 
+glm::vec3 normalize(glm::vec3 in)
+{
+    in /= glm::length(in) + 0.000001;
+    return in;
+}
+
+// ============================================= //
+
 glm::vec3 normalize(glm::vec3 vec, double limit)
 {
     // Compute the length of the vector
@@ -108,6 +116,11 @@ double computeAngle(glm::vec3 vec1, glm::vec3 vec2)
 
 // ============================================= //
 
+/**
+ * point.x => Ro
+ * point.y => theta
+ * point.z => phi
+*/
 glm::vec3 sphericalToCartesian(glm::vec3 point)
 {
     glm::vec3 out;
@@ -119,6 +132,11 @@ glm::vec3 sphericalToCartesian(glm::vec3 point)
 
 // ============================================= //
 
+/**
+ * out.x => Ro
+ * out.y => theta
+ * out.z => phi
+*/
 glm::vec3 cartesianToSpherical(glm::vec3 point)
 {
     glm::vec3 out;

@@ -51,7 +51,8 @@ glm::mat4 floorPos(
 enum LeaderModes
 {
     RANDOM_POSITION,
-    CIRCLE
+    CIRCLE,
+    FREE_MOTION
 };
 
 // The leader
@@ -94,10 +95,10 @@ void initialize()
 
     // Create the Leader
     leader = new Boid(glm::vec3(5,10,5));
-    leader->setVelocity(glm::vec3(0,0,-1));
+//    leader->setVelocity(glm::vec3(0,0,-1));
 
     // Create the flock
-    flock = new Flock(100);
+    flock = new Flock(5);
 
     //exit(0);
 }
@@ -110,7 +111,7 @@ void update()
     if (leaderMode == RANDOM_POSITION)
     {
         int current = (int) glfwGetTime();
-        if (lastUpdated != current && current % 4 == 0)
+        if (lastUpdated != current && current % 10 == 0)
         {
             leaderGoal.x = Util::getRandom() * 40 - 20;
             leaderGoal.y = Util::getRandom() * 20;
@@ -119,12 +120,16 @@ void update()
         }
         if (leader != 0) leader->update(leaderGoal);
     }
-    else
+    else if (leaderMode == CIRCLE)
     {
         leaderGoal = glm::vec3(50, 10, 50);
-        leaderGoal.x *= glm::cos(glfwGetTime() * Util::PI / 8);
-        leaderGoal.z *= -glm::sin(glfwGetTime() * Util::PI / 8);
+        leaderGoal.x *= glm::cos(glfwGetTime() * Util::PI / 10);
+        leaderGoal.z *= -glm::sin(glfwGetTime() * Util::PI / 10);
         if (leader != 0) leader->update(leaderGoal);
+    }
+    else
+    {
+        if (leader != 0) leader->update();
     }
 
     // Update the flock
@@ -136,6 +141,7 @@ void update()
     // Update Camera position
     if (cameraMode == BEHIND)
     {
+        up = glm::vec3(0,1,0);
         glm::vec3 dist = flock->computeFlockHeading();
         dist *= 10;
         eye = flock->computeFlockCenter() - dist;
@@ -284,6 +290,7 @@ void print()
     std::cout << "Center: (" << center.x << ", " << center.y << ", " << center.z << ")" << std::endl;
     std::cout << "Leader: (" << leader->getPosition().x << ", " << leader->getPosition().y << ", " << leader->getPosition().z << ")" << std::endl;
     std::cout << "Leader Goal: (" << leaderGoal.x << ", " << leaderGoal.y << ", " << leaderGoal.z << ")" << std::endl;
+    std::cout << "Leader Speed: " << leader->getSpeed() << std::endl;
     std::cout << "Num. Boids: " << flock->getNumBoids() << std::endl;
     std::cout << "--------------------" << std::endl;
 }
@@ -302,7 +309,20 @@ void keyPressed(int key, int status)
 {
     if(status == GLFW_RELEASE) return;
 
-    if (key == 'P') paused = !paused;
+
+    if (key == 'R')
+    {
+            // Create the Leader
+            delete leader;
+            leader = new Boid(glm::vec3(5,10,5));
+            leader->setSpeed(0);
+            leaderMode = CIRCLE;
+
+            // Create the flock
+            delete flock;
+            flock = new Flock(5);
+    }
+    else if (key == 'P') paused = !paused;
     else if (key == 'N' && paused)
     {
         update(); draw();
@@ -316,6 +336,35 @@ void keyPressed(int key, int status)
     else if (key == GLFW_KEY_KP_3) cameraMode = SIDE_VIEW;
     else if (key == GLFW_KEY_F1) leaderMode = RANDOM_POSITION;
     else if (key == GLFW_KEY_F2) leaderMode = CIRCLE;
+    else if (key == GLFW_KEY_F3) leaderMode = FREE_MOTION;
+    else if (key == GLFW_KEY_LEFT && leaderMode == FREE_MOTION)
+    {
+        leader->rotateYaw(-DELTA_ANGLE);
+    }
+    else if (key == GLFW_KEY_RIGHT && leaderMode == FREE_MOTION)
+    {
+        leader->rotateYaw(DELTA_ANGLE);
+    }
+    else if (key == GLFW_KEY_UP && leaderMode == FREE_MOTION)
+    {
+        leader->rotatePitch(DELTA_ANGLE);
+    }
+    else if (key == GLFW_KEY_DOWN && leaderMode == FREE_MOTION)
+    {
+        leader->rotatePitch(-DELTA_ANGLE);
+    }
+    else if (key == 'W' && leaderMode == FREE_MOTION)
+    {
+        leader->addSpeed(0.2);
+    }
+    else if (key == 'S' && leaderMode == FREE_MOTION)
+    {
+        leader->addSpeed(-0.2);
+    }
+    else if (key == 'H' && leaderMode == FREE_MOTION)
+    {
+        leader->setSpeed(0);
+    }
 }
 
 // ============================================= //

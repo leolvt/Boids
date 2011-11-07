@@ -14,6 +14,7 @@ const double PI = 3.14592653589793;
 double getRandom();
 double normSigmoid(double val, double limit);
 double normNegSigmoid(double val, double limit);
+glm::vec3 normalize(glm::vec3 in);
 glm::vec3 normalize(glm::vec3 vec, double limit);
 glm::vec3 normalizeNeg(glm::vec3 vec, double limit);
 double computeAngle(glm::vec3 vec1, glm::vec3 vec2);

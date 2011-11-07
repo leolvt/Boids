@@ -32,14 +32,14 @@ void Flock::update(glm::vec3 target)
 {
     /* The vectors which influentiate the boids' speed */
     glm::vec3 separation;
-    glm::vec3 flockVelocity = computeFlockVelocity();
+    glm::vec3 flockHeading = computeFlockHeading();
     glm::vec3 center = computeFlockCenter();
 
     /* Update each Boid */
     for (auto boid = boids.begin(); boid != boids.end(); boid++)
     {
         separation = computeBoidSeparation(boid);
-        boid->update(separation, flockVelocity, center, target);
+        boid->update(separation, flockHeading, center, target);
     }
 }
 
@@ -61,11 +61,7 @@ glm::vec3 Flock::computeBoidSeparation(std::vector<Boid>::iterator currBoid)
 glm::vec3 Flock::computeFlockVelocity()
 {
     glm::vec3 velocity(0,0,0);
-    for (auto boid = boids.begin(); boid != boids.end(); boid++)
-    {
-        velocity += boid->getVelocity();
-    }
-    velocity /= boids.size();
+
     return velocity;
 }
 
@@ -131,7 +127,7 @@ void Flock::deleteBoid()
 {
     if (m_NumBoids > 0)
     {
-        int idx = (int) (Util::getRandom() * m_NumBoids);
+        unsigned int idx = (int) (Util::getRandom() * m_NumBoids);
         if (idx == m_NumBoids) idx--;
         boids.erase( boids.begin() + idx );
         m_NumBoids--;

@@ -28,23 +28,27 @@ class Boid
         void setVelocity(glm::vec3 newVelocity);
         glm::vec3 computeSeparation(Boid& b);
 
+        double getSpeed() {return m_Speed;};
+        void setSpeed(double speed);
+        void addSpeed(double speed);
+
         void rotateYaw(double degrees);
         void rotatePitch(double degrees);
 
         static void setFPS(unsigned int FPS);
 
     private:
-        void step(glm::vec3 separationComp, glm::vec3 alignmentComp,
+        void myStep(glm::vec3 separationComp, glm::vec3 alignmentComp,
                  glm::vec3 cohesionComp, glm::vec3 targetComp,
                  glm::vec3 floorComp, glm::vec3 towerComp);
 
         glm::vec3 m_Position;
-        glm::vec3 m_Heading;
-        glm::vec3 m_Velocity;
 
+        float m_Speed;
         float m_AngleX;
         float m_AngleY;
         float m_AngleZ;
+
         float m_NeckSize;
         float m_HeadHeight;
         float m_BodyHeight;
@@ -59,9 +63,6 @@ class Boid
         float m_FlapPhase;
         float m_FlapFactor;
         float m_FlapTick;
-
-        double m_Yaw_Constant_Rotation;
-        double m_Pitch_Constant_Rotation;
 
         static unsigned int s_FPS;
 };
